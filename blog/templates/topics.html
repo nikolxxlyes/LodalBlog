@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>Topics:</h1>
+    {% if not current_user.is_anonymous %}
+        <p><a href="{{ url_for('new_topic') }}">Add Topic</a></p>
+    {% endif %}
+    <hr>
+    <table class="h1_tab">
+        <tr>
+            <th id="h1_th"></th>
+            <th id="h1_th">Tema</th>
+            <th id="h1_th">Posts</th>
+            <th id="h1_th">Last msg</th>
+        </tr>
+        {% if topics %}
+        {% for topic in topics %}
+            <tr id="h1_th" valign="top">
+                <td id="h1_th" style="text-align: center; padding-top :10px" ><img src={{icon_url}}></td>
+                <td id="h1_th">
+                    <div><h4><a href="{{ url_for('topic',t=topic.id) }}">{{ topic.name }}</a></h4></div>
+                    <div><a href="{{ url_for('user', username=topic.author.username) }}"> {{ topic.author.username }}</a>
+                        added topic in {{ topic.timestamp }}</div>
+                </td>
+                <td id="h1_th">{{ topic.count_posts }}</td>
+                <td id="h1_th" >{{ topic.last_time  }}</td>
+            </tr>
+        {% endfor %}
+        {% endif %}
+    </table>
+        {% include '_prev_next_page.html' %}
+{% endblock %}

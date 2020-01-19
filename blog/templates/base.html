@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" charset="UTF-8" content="width=device-width, initial-scale=1.0">
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <style type="text/css">
+        .main {
+            border: 1px solid black;
+            text-align: center;
+            background-color: #99ffcc;
+        }
+        #login {
+            margin: auto;
+            width: 300px;
+            border: 1px solid black;
+            text-align: center;
+            background-color: #2b598c;
+            color: white;
+        }
+        #bar_ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #333;
+        }
+
+        #bar_a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+        #bar_log {
+            width: 15%;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+        #bar_a_right {
+            float: right;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+        #10 {
+        margin-right: 10px
+        }
+
+        /* Change the link color to #111 (black) on hover */
+        #bar_a:hover {
+            background-color: #111;
+        }
+        #bar_a_right:hover {
+            background-color: #111;
+        }
+        .active {
+            background-color: #4CAF50;
+        }
+        .h1_tab {
+          border-collapse: collapse;
+          width: 100%;
+          border: 1px solid black;
+          text-align: left;
+        }
+        #h1_th {
+            padding: 5px;
+            border: 1px solid black;
+            text-align: left;
+        }
+    </style>
+    {% if title %}
+        <title>{{ title }} - LodalBlog</title>
+    {% else %}
+        <title>LodalBlog</title>
+    {% endif %}
+    <ul id="bar_ul">
+        <li id="bar_log" style="float: left;"></li>
+        <li><a id="bar_a" href="{{ url_for('index') }}">Lodal Blog:</a></li>
+        <li><a id="bar_a" href="{{ url_for('topics') }}">Home</a></li>
+        <li><a id="bar_a" href="{{ url_for('friends_posts') }}">Friends</a></li>
+        <li id="bar_log" style="float:right;"></li>
+        {% if current_user.is_anonymous %}
+            <li id="10"><a id="bar_a_right" class="active" href="{{ url_for('login') }}">Login</a></li>
+        {% else %}
+            <li id="10"><a id="bar_a_right" href="{{ url_for('logout') }}">Logout</a></li>
+            <li><a id="bar_a_right" style="margin-right: 0px" class="active"
+                   href="{{ url_for('user', username=current_user.username) }}">Profile</a>
+            </li>
+        {% endif %}
+    </ul>
+</head>
+<body style="background-color: #e9ede6">
+         {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div style="background-color: #b2badb; wight:100vh: text-align: center; padding-top:1px;">
+                    {% for message in messages %}
+                    <h3 style="margin-left: 20%;">{{ message }}</h3>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+         <div class="container">{% block header %}{% endblock header %}</div>
+	     <div class="container">{% block content %}{% endblock content %}</div>
+</body>
+</html>

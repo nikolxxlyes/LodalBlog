@@ -1,0 +1,10 @@
+{% if prev_url or next_url %}
+    <div style="padding: 5px 50px;width:100%;float:right;background-color: #333">
+        {% if prev_url %}
+            <button><a href="{{ prev_url }}">Prev page</a></button>
+        {% endif %}
+        {% if next_url %}
+            <button><a href="{{ next_url }}">Next page</a></button>
+        {% endif %}
+    </div>
+{% endif %}

@@ -1,0 +1,15 @@
+<tr id="h1_th" valign="top">
+    <td id="h1_th">
+        <div><b><a href="{{ url_for('user', username=post.author.username) }}">{{ post.author.username }}</a></b></div>
+        <div><img src="{{ post.author.avatar(45) }}"></div>
+    </td>
+    <td id="h1_th">
+        <div><h4>{{ post.body }}</h4></div>
+        <div>
+            {{ post.timestamp }}
+            {% if current_user == post.author %}
+              __ <a href="{{ url_for('edit_post', p=post.post_id) }}">Edit</a>
+            {% endif %}
+        </div>
+    </td>
+</tr>

@@ -1,20 +1,24 @@
 # -*- coding: utf-8 -*-
 from blog import app,db
-from flask import render_template, url_for, redirect,flash
+from flask import render_template, url_for, redirect,flash,session
 from .forms import LoginForm,RegistrationForm,EditProfileForm,EmailForm,PasswordForm, \
 	NewTopicForm, EditTopicForm, NewPostForm, EditPostForm
 from flask_login import logout_user,login_user,current_user,login_required
-from blog.models import User, Topic, Post
-#next
+from blog.models import User, Topic, Post,ExchangeRate
 from flask import request
-from werkzeug.urls import url_parse
+
 from datetime import datetime
-from operator import itemgetter
+
+from help_files.exchange_rates import set_currency_pair
+from help_files.geo import get_icon,get_geo
+
+from flask import escape
+from werkzeug.urls import url_parse
 
 @app.route('/')
 @app.route('/index')
 def index():
-	return render_template('index.html', title='Home')
+	return render_template('index.html', title='Home',)
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
@@ -54,7 +58,7 @@ def logout():
 	logout_user()
 	return redirect(url_for('index'))
 
-@app.route('/user/<username>')
+@app.route('/u/<username>')
 @login_required
 def user(username):
 	user = User.query.filter_by(username=username).first_or_404()
@@ -76,7 +80,7 @@ def before_request():
 		current_user.last_seen = datetime.utcnow()
 		db.session.commit()
 
-@app.route('/user/<username>/edit_profile', methods=['POST', "GET"])
+@app.route('/u/<username>/edit_profile', methods=['POST', "GET"])
 @login_required
 def edit_profile(username):
 	form = EditProfileForm()
@@ -122,7 +126,7 @@ def topics():
 		page,app.config['TOPIC_PER_PAGE'],False)
 	next_url = url_for('topics', page=topics.next_num) if topics.has_next else None
 	prev_url = url_for('topics', page=topics.prev_num) if topics.has_prev else None
-	icon_url = 'https://icon-icons.com/icons2/2110/PNG/{}/comment_icon_131036.png'.format(48)
+	icon_url = '//icon-icons.com/icons2/2110/PNG/{}/comment_icon_131036.png'.format(48)
 	topics_sellect = []
 	for topic in topics.items:
 		count_posts = topic.posts.filter(Post.active==1).count()
@@ -141,16 +145,12 @@ def topic(t):
 			page,app.config['POST_PER_PAGE'],False)
 	next_url = url_for('topic',t=t, page=posts.next_num) if posts.has_next else None
 	prev_url = url_for('topic',t=t, page=posts.prev_num) if posts.has_prev else None
-
 	#add post in topic
 	form = NewPostForm()
 	if form.validate_on_submit():
-		user_id = current_user.id
-		post = Post(body=form.body.data, user_id=user_id, topic_id=topic.id)
-		db.session.add(post)
-		db.session.commit()
-		flash('Congratulations, your post had been added!')
-		return redirect(url_for('topic',t=t))
+		session['data_post'] = {'body': form.body.data}
+		# flash(form.body.data)
+		return redirect(url_for('new_post', t=t,))
 	return render_template('topic.html',title='Topic', topic=topic, posts=posts.items,next_url=next_url,
 						   prev_url=prev_url,form=form)
 
@@ -162,7 +162,7 @@ def new_topic():
 		user_id = current_user.id
 		topic = Topic(name=form.name.data, user_id=user_id)
 		db.session.add(topic)
-		topic = Topic.query.filter_by(name=topic.name).first()
+		db.session.commit()
 		post = Post(body=form.msg.data, user_id=user_id, topic_id=topic.id)
 		db.session.add(post)
 		db.session.commit()
@@ -186,19 +186,25 @@ def edit_topic(t):
 		form.name.data = topic.name
 	return render_template('edit_topic.html',title='Edit Topic', topic=topic, form=form)
 
-@app.route('/topic/<t>/add_post', methods=['POST', "GET"])
+@app.route('/add_post', methods=['POST', "GET"])
 @login_required
-def new_post(t):
+def new_post():
 	form = NewPostForm()
+	t = request.args.get('t')
+	p = request.args.get('p')
 	topic = Topic.query.get(t)
-	if form.validate_on_submit():
+	repost = Post.query.get(p).body if p else None
+	on_session_data = session.pop('data_post',None)
+	if form.validate_on_submit() or on_session_data:
+		if on_session_data:
+			form.body.data = on_session_data
 		user_id = current_user.id
-		post = Post(body=form.body.data, user_id=user_id, topic_id=topic.id)
+		post = Post(body=form.body.data, user_id=user_id, topic_id=t,parent=p)
 		db.session.add(post)
 		db.session.commit()
 		flash('Congratulations, your post had been added!')
 		return redirect(url_for('topic', t=post.topic_id))
-	return render_template('new_post.html', title='Add Post', form=form, topic=topic)
+	return render_template('new_post.html', title='Add Post', form=form, topic=topic,repost=repost)
 
 @app.route('/<p>/edit', methods=["POST", "GET"])
 @login_required
@@ -216,7 +222,7 @@ def edit_post(p):
 	elif request.method == "GET":
 		form.body.data = post.body
 		form.active.data = post.active
-	return render_template('edit_post.html',title='Edit Post', topic=topic, form=form)
+	return render_template('edit_post.html',title='Edit Post', topic=topic, form=form,post=post)
 
 @app.route('/follow/<username>')
 @login_required
@@ -257,3 +263,59 @@ def friends_posts():
 	prev_url = url_for('friends_posts', page=posts.prev_num) if posts.has_prev else None
 	return render_template('friends_posts.html', title="Friends Posts", posts=posts.items, next_url=next_url,
 						   prev_url=prev_url)
+
+@app.route('/rates')
+def rates():
+	pairs = ExchangeRate.query.all()
+	if request.args.get('pull'):
+		delta = datetime.utcnow() - pairs[0].timestamp
+		delta = delta.seconds // 3600
+		if delta >= 2:
+			set_currency_pair(db,ExchangeRate)
+			pairs = ExchangeRate.query.all()
+	return render_template('rates.html', title="Exchange rates", pairs=pairs,)
+
+@app.route('/weather')
+def weather():
+	city='kiev'
+	weather = get_geo(city)
+	date = datetime.strptime(weather["ob_time"], '%Y-%m-%d %H:%M')
+	if request.args.get('pull'):
+		delta = datetime.utcnow() - date
+		delta = delta.seconds // 3600
+		if delta >= 1:
+			weather = get_geo(city)
+	return render_template('weather.html', title="Weather", weather=weather,)
+
+
+# def redd(location, code=302, Response=None):
+#
+# 	if Response is None:
+# 		from werkzeug.wrappers import Response
+#
+# 	display_location = escape(location)
+# 	text_type= str
+# 	if isinstance(location, text_type):
+# 		# Safe conversion is necessary here as we might redirect
+# 		# to a broken URI scheme (for instance itms-services).
+# 		from werkzeug.urls import iri_to_uri
+#
+# 		location = iri_to_uri(location, safe_conversion=True)
+# 	response = Response(
+# 		'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n'
+# 		"<title>Redirecting...</title>\n"
+# 		"<h1>Redirecting...</h1>\n"
+# 		"<p>You should be redirected automatically to target URL: "
+# 		'<a href="%s">%s</a>.  If not click the link.'
+# 		% (escape(location), display_location),
+# 		code,
+# 		mimetype="text/html",
+#     )
+# 	response.headers["Location"] = location
+# 	return response
+
+# @app.route('/geo')
+# def geo():
+# 	url = "https://ipinfo.io/json"
+# 	# return redd(url)
+

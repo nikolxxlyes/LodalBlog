@@ -1,8 +1,9 @@
-# Lodal Blog
-Flask project test
+# LodalBlog
+Flask project blog
 
 pip discribe >>> requirements.txt
 
-run app >>> set FLASK_APP=lodalblog.py
+Run app >>> set FLASK_APP=lodalblog.py
+        >>> flask run 
 
-For fast test data >>> run new_base_data.py after create new db
+For fast test Data >>> Run help_files/new_base_data.py (after created new app.db)

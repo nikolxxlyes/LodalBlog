@@ -49,10 +49,6 @@
             padding: 14px 16px;
             text-decoration: none;
         }
-        #10 {
-        margin-right: 10px
-        }
-
         /* Change the link color to #111 (black) on hover */
         #bar_a:hover {
             background-color: #111;
@@ -64,15 +60,38 @@
             background-color: #4CAF50;
         }
         .h1_tab {
-          border-collapse: collapse;
-          width: 100%;
-          border: 1px solid black;
-          text-align: left;
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid black;
+            text-align: left;
         }
         #h1_th {
             padding: 5px;
             border: 1px solid black;
-            text-align: left;
+        }
+        div.rep {
+            margin-left: 30px;
+        }
+        p.rep {
+            border-style: outset;
+            background: white;
+        }
+        .dropdown {
+          position: relative;
+          display: inline-block;
+        }
+
+        .dropdown-content {
+          display: none;
+          position: absolute;
+          background-color: #f9f9f9;
+          min-width: 160px;
+          box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+          padding: 12px 16px;
+          z-index: 1;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
         }
     </style>
     {% if title %}
@@ -83,15 +102,17 @@
     <ul id="bar_ul">
         <li id="bar_log" style="float: left;"></li>
         <li><a id="bar_a" href="{{ url_for('index') }}">Lodal Blog:</a></li>
-        <li><a id="bar_a" href="{{ url_for('topics') }}">Home</a></li>
-        <li><a id="bar_a" href="{{ url_for('friends_posts') }}">Friends</a></li>
+        <li><a id="bar_a" href="{{ url_for('topics') }}">Темы</a></li>
+        <li><a id="bar_a" href="{{ url_for('friends_posts') }}">Друзья</a></li>
+        <li><div ><a id="bar_a" href="{{ url_for('rates') }}">Валюты</a></div></li>
+        <li><div ><a id="bar_a" href="{{ url_for('weather') }}">Погода</a></div></li>
         <li id="bar_log" style="float:right;"></li>
         {% if current_user.is_anonymous %}
-            <li id="10"><a id="bar_a_right" class="active" href="{{ url_for('login') }}">Login</a></li>
+            <li><a id="bar_a_right" class="active" href="{{ url_for('login') }}">Вход</a></li>
         {% else %}
-            <li id="10"><a id="bar_a_right" href="{{ url_for('logout') }}">Logout</a></li>
+            <li><a id="bar_a_right" href="{{ url_for('logout') }}">Выход</a></li>
             <li><a id="bar_a_right" style="margin-right: 0px" class="active"
-                   href="{{ url_for('user', username=current_user.username) }}">Profile</a>
+                   href="{{ url_for('user', username=current_user.username) }}">Профиль</a>
             </li>
         {% endif %}
     </ul>
@@ -106,7 +127,6 @@
                 </div>
             {% endif %}
         {% endwith %}
-
          <div class="container">{% block header %}{% endblock header %}</div>
 	     <div class="container">{% block content %}{% endblock content %}</div>
 </body>

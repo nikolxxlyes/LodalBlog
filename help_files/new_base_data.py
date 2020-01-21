@@ -1,27 +1,23 @@
 from blog import app, db
-from blog.models import User,Post,Topic,ExchangeRate
-from exchange_rates import get_currency_pair,set_currency_pair
+from blog.models import User,Post,Topic
 """
 Заполняет базу юзерами, темами и постами для теста
 """
-#Настройка для тестов
+#Закоментируйте следующие две строчки для работы с реальной базой
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
 db.create_all()
 
 #создание юзеров
 users = [User(username="admin_{}".format(i),email=f'admin{i}@gmail.com') for i in range(11,20)]
-for user in users:
-    db.session.add(user)
+db.session.add_all(users)
 db.session.commit()
 #ввод тем
-topics = [Topic(name = f"new topic _{user.username}", user_id=user.id) for user in users]
-for topic in topics:
-    db.session.add(topic)
+topics = [Topic(name = f"New topic {user.username}", user_id=user.id) for user in users]
+db.session.add_all(topics)
 db.session.commit()
 #ввод постов
-posts = [Post(body= f"new post {user.username}",user_id=user.id, topic_id=topic.id) for topic in topics for user in users]
-for post in posts:
-    db.session.add(post)
+posts = [Post(body= f"New post {user.username}",user_id=user.id, topic_id=topic.id) for topic in topics for user in users]
+db.session.add_all(posts)
 
 #Установка паролей
 for i,user in enumerate(users):

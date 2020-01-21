@@ -2,7 +2,9 @@
 {% block content %}
     <h1>{{ topic.name }}:</h1>
     <hr>
-    <h2>Add Post:</h2>
+    {% if repost %}
+        <h3>Ответ на  -- {{ repost }}</h3>
+    {% endif %}
     <form action="" method="post">
         {{ form.hidden_tag() }}
         <p>

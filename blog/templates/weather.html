@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>Курсы валют:</h1>
+    <hr>
+    <table class="h1_tab">
+        <tr>
+            <th id="h1_th"></th>
+            <th id="h1_th">Восход</th>
+            <th id="h1_th">Закат</th>
+            <th id="h1_th">Город</th>
+            <th id="h1_th">Время</th>
+            <th id="h1_th">Температура</th>
+            <th id="h1_th">Скорость ветра</th>
+            <th id="h1_th">Описание</th>
+        </tr>
+        {% if weather %}
+            <tr id="h1_th" valign="top">
+                <td id="h1_th"></td>
+                <td id="h1_th">{{ weather['sunrise'] }}</td>
+                <td id="h1_th">{{ weather['sunset'] }}</td>
+                <td id="h1_th">{{ weather['city_name'] }}</td>
+                <td id="h1_th">{{ weather['ob_time'] }}</td>
+                <td id="h1_th">{{ weather['temp'] }}C </td>
+                <td id="h1_th">{{ weather['wind_spd']}} m/s</td>
+                <td id="h1_th">{{ weather['description']}}</td>
+            </tr>
+        {% endif %}
+    </table>
+<h4>По данным cайта <a href="https://www.weatherbit.io/">https://www.weatherbit.io</a></h4>
+<button><a href="{{url_for('weather',pull=1) }}">Обновить</a></button>
+{% endblock %}

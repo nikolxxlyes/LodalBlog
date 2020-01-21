@@ -4,11 +4,20 @@
         <div><img src="{{ post.author.avatar(45) }}"></div>
     </td>
     <td id="h1_th">
+        {% if post.parent %}
+            <div class="rep">
+                <p style="margin : 0px">{{post.get_parent().author.username}} писал(а):</p>
+                <p class="rep">{{ post.get_parent().body }}</p>
+            </div>
+        {% endif %}
         <div><h4>{{ post.body }}</h4></div>
         <div>
             {{ post.timestamp }}
+            {% if not current_user.is_anonymous %}
+              __ <a href="{{ url_for('new_post', t=post.topic.id, p=post.id) }}">Коментировать</a>
+            {% endif %}
             {% if current_user == post.author %}
-              __ <a href="{{ url_for('edit_post', p=post.post_id) }}">Edit</a>
+              __ <a href="{{ url_for('edit_post', p=post.id) }}">Редактировать</a>
             {% endif %}
         </div>
     </td>

@@ -10,6 +10,10 @@ followers = db.Table('followers',
     db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))
 )
 
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
 class User(UserMixin,db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
@@ -66,6 +70,9 @@ class Topic(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow())
     posts = db.relationship('Post', backref='topic', lazy='dynamic')
 
+    def __repr__(self):
+        return f"<Topic: {self.name}>"
+
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.String(140))
@@ -78,11 +85,15 @@ class Post(db.Model):
     def __repr__(self):
         return f"<Post: {self.body}>"
 
+    def get_parent(self):
+        return Post.query.get(self.parent)
 
+class ExchangeRate(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    currency_pair = db.Column(db.String(16))
+    buy = db.Column(db.Float(precision=2))
+    sale = db.Column(db.Float())
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow())
 
     def __repr__(self):
-        return f"<Topic: {self.name}>"
-
-@login.user_loader
-def load_user(id):
-    return User.query.get(int(id))
+        return f"<{self.currency_pair}: {self.buy}/{self.sale}>"

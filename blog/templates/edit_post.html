@@ -3,6 +3,9 @@
     <h1>{{ topic.name }}</h1>
     <hr>
     <h2>Edit Post:</h2>
+    {% if post.parent %}
+        <h3>Коментировать  -- {{ post.parent }}</h3>
+    {% endif %}
     <form action="" method="post" >
         {{ form.hidden_tag() }}
         <p>

@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 import unittest
 from blog import app, db
-from blog.models import User, Post
+from blog.models import User, Post, ExchangeRate
+from exchange_rates import get_currency_pair,set_currency_pair
 
 class UserModelCase(unittest.TestCase):
     def setUp(self):
@@ -84,6 +85,16 @@ class UserModelCase(unittest.TestCase):
         self.assertEqual(f2, [p2, p3])
         self.assertEqual(f3, [p3, p4])
         self.assertEqual(f4, [p4])
+
+    def test_currency_pair(self):
+        #Check currency pair
+        current_pairs = get_currency_pair()
+        pair = current_pairs[0]
+        set_currency_pair(db,ExchangeRate)
+        i = ExchangeRate.query.first()
+        self.assertEqual(i.currency_pair, pair['currency_pair'])
+        self.assertEqual(i.buy, pair['buy'])
+        self.assertEqual(i.sale, pair['sale'])
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

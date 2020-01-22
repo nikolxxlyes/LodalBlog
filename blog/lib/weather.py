@@ -1,5 +1,10 @@
+def get_geo_icon(icon,size):
+    from PIL import Image
+    img = Image.open(r'help_files/icons/{}.png'.format(icon))
+    re_img = img.resize(size)
+    return re_img
 
-def get_geo(city):
+def get_geo(city,size=(48,48)):
     import requests
     url = "http://api.weatherbit.io/v2.0/current?key=ce98563a888c4c99bd95e6df31181c52&city={}".format(city)
     r = requests.get(url)
@@ -18,19 +23,15 @@ def get_geo(city):
         'sunset': w['sunset'],
         'ob_time': w['ob_time'],
         'city_name': w['city_name'],
-        'tem': w['temp'],
+        'temp': w['temp'],
         'wind_spd': w['wind_spd'],
         'description': w['weather']['description'],
-        'icon_code': w['weather']['icon'],
+        'icon': get_geo_icon(w['weather']['icon'],size)
     }
+    if weather['temp']>= 0:
+        weather['temp'] = '+ ' + str(weather['temp'])
+
     return weather
 
-def get_icon(icon):
-    from PIL import Image
-    img = Image.open(r'icons/{}.png'.format(icon))
-
-    return img
-#
 # weather = get_geo('kiev')
 # print(weather)
-# get_icon(weather['icon_code'])

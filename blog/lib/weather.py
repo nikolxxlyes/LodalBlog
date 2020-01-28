@@ -1,8 +1,10 @@
 def get_geo_icon(icon,size):
     from PIL import Image
-    img = Image.open(r'help_files/icons/{}.png'.format(icon))
-    re_img = img.resize(size)
-    return re_img
+    import os
+    file_path = os.path.join('blog', 'static', 'icons', '{}.png'.format(icon))
+    # img = Image.open(file_path)
+    # re_img = img.resize(size)
+    return file_path
 
 def get_geo(city,size=(48,48)):
     import requests
@@ -17,6 +19,7 @@ def get_geo(city,size=(48,48)):
         w = w['data'][0]
     else:
         return None
+
     weather = {
         'timezone': w['timezone'],
         'sunrise': w['sunrise'],

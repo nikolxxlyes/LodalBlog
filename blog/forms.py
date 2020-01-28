@@ -39,17 +39,13 @@ class EditProfileForm(FlaskForm):
 
 class EmailForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
-    submit = SubmitField("Submit")
+    submit = SubmitField('Reset')
 
-    # def validate_email(self, email):
-    #     user = User.query.filter_by(email=email.data).first()
-    #     if user is None:
-    #         raise ValidationError("This an email address wasn't using.")
-
-class PasswordForm(FlaskForm):
+class ResetPasswordForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
-    password2 = PasswordField('Repeat password', validators=[DataRequired(),EqualTo('password')])
-    submit = SubmitField("Submit")
+    password2 = PasswordField(
+        'Repeat Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Request Password Reset')
 
 class NewTopicForm(FlaskForm):
     name = StringField('Topic name', validators=[DataRequired()])

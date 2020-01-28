@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from blog import app,db
 from flask import render_template, url_for, redirect,flash,session
-from .forms import LoginForm,RegistrationForm,EditProfileForm,EmailForm,PasswordForm, \
-	NewTopicForm, EditTopicForm, NewPostForm, EditPostForm
+from .forms import LoginForm,RegistrationForm,EditProfileForm,EmailForm, \
+	NewTopicForm, EditTopicForm, NewPostForm, EditPostForm, \
+	ResetPasswordForm
 from flask_login import logout_user,login_user,current_user,login_required
 from blog.models import User, Topic, Post,ExchangeRate
 from flask import request
@@ -12,6 +13,8 @@ from blog.lib.exchange_rates import set_currency_pair
 from blog.lib.weather import get_geo,geo_import
 #oauth
 from blog.oauth import OAuthSignIn
+#reset_password
+from blog.email import send_password_reset_email
 
 @app.route('/')
 @app.route('/index')
@@ -92,30 +95,6 @@ def edit_profile(username):
 		form.username.data = current_user.username
 		form.about_me.data = current_user.about_me
 	return render_template('edit_profile.html', title='Edit Profile', form=form)
-
-@app.route('/reset', methods=['POST', 'GET'])
-def reset_password():
-	if current_user.is_authenticated:
-		return redirect(url_for('index'))
-	form = EmailForm()
-	if form.validate_on_submit():
-		email=form.email.data
-		return redirect(url_for('reset_password2',email=email))
-	return render_template('reset_password.html', title='Reset', form=form)
-
-@app.route('/reset/<email>', methods=['POST', 'GET'])
-def reset_password2(email):
-	if current_user.is_authenticated:
-		return redirect(url_for('index'))
-	form = PasswordForm()
-	if form.validate_on_submit():
-		user = User.query.filter_by(email=email).first_or_404()
-		user.set_password(form.password.data)
-		db.session.add(user)
-		db.session.commit()
-		flash('Congratulations, your password had been changed!')
-		return redirect(url_for('login'))
-	return render_template('reset_password2.html', title='Reset', form=form)
 
 @app.route('/topics')
 def topics():
@@ -341,5 +320,32 @@ def finish_register():
 		return redirect(url_for('index'))
 	return render_template('finish_register.html',form=form)
 
+@app.route('/reset_password_request', methods=['GET', 'POST'])
+def reset_password_request():
+	if current_user.is_authenticated:
+		return redirect(url_for('index'))
+	form = EmailForm()
+	if form.validate_on_submit():
+		user = User.query.filter_by(email=form.email.data).first()
+		if user:
+			send_password_reset_email(user)
+		flash('Check your email for the instructions to reset your password')
+		return redirect(url_for('login'))
+	return render_template('reset_password_request.html',title='Reset Password', form=form)
+
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+	if current_user.is_authenticated:
+		return redirect(url_for('index'))
+	user = User.verify_reset_password_token(token)
+	if not user:
+		return redirect(url_for('index'))
+	form = ResetPasswordForm()
+	if form.validate_on_submit():
+		user.set_password(form.password.data)
+		db.session.commit()
+		flash('Your password has been reset.')
+		return redirect(url_for('login'))
+	return render_template('reset_password.html', form=form)
 
 

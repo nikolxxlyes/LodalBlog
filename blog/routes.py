@@ -6,14 +6,12 @@ from .forms import LoginForm,RegistrationForm,EditProfileForm,EmailForm,Password
 from flask_login import logout_user,login_user,current_user,login_required
 from blog.models import User, Topic, Post,ExchangeRate
 from flask import request
-
-from datetime import datetime
-
-from help_files.exchange_rates import set_currency_pair
-from help_files.geo import get_icon,get_geo
-
-from flask import escape
 from werkzeug.urls import url_parse
+from datetime import datetime
+from blog.lib.exchange_rates import set_currency_pair
+from blog.lib.weather import get_geo,geo_import
+#oauth
+from blog.oauth import OAuthSignIn
 
 @app.route('/')
 @app.route('/index')
@@ -267,55 +265,81 @@ def friends_posts():
 @app.route('/rates')
 def rates():
 	pairs = ExchangeRate.query.all()
+	if not pairs:
+		set_currency_pair(db, ExchangeRate)
+		pairs = ExchangeRate.query.all()
 	if request.args.get('pull'):
 		delta = datetime.utcnow() - pairs[0].timestamp
 		delta = delta.seconds // 3600
-		if delta >= 2:
+		if delta >= 1:
 			set_currency_pair(db,ExchangeRate)
 			pairs = ExchangeRate.query.all()
+		else:
+			flash("Новых валютных котировок еще не прислали.")
 	return render_template('rates.html', title="Exchange rates", pairs=pairs,)
 
 @app.route('/weather')
 def weather():
 	city='kiev'
-	weather = get_geo(city)
-	date = datetime.strptime(weather["ob_time"], '%Y-%m-%d %H:%M')
+	weathers = get_geo()
+	date = datetime.strptime(weathers[0]["time"], '%Y-%m-%d %H:%M:%S')
 	if request.args.get('pull'):
 		delta = datetime.utcnow() - date
 		delta = delta.seconds // 3600
 		if delta >= 1:
-			weather = get_geo(city)
-	return render_template('weather.html', title="Weather", weather=weather,)
+			geo_import(city)
+			weathers = get_geo()
+		else:
+			flash("В Метеостанции перерыв.")
+	return render_template('weather.html', title="Weather", weathers=weathers)
+
+@app.route('/authorize/<provider>')
+def oauth_authorize(provider):
+	if not current_user.is_anonymous:
+		return redirect(url_for('index'))
+	oauth = OAuthSignIn.get_provider(provider)
+	return oauth.authorize()
+
+@app.route('/callback/<provider>')
+def oauth_callback(provider):
+	reversed()
+	if not current_user.is_anonymous:
+		return redirect(url_for('index'))
+	oauth = OAuthSignIn.get_provider(provider)
+	social_id, username, email,*par = oauth.callback()
+	if social_id is None:
+		flash('Authentication failed.')
+		return redirect(url_for('index'))
+	user = User.query.filter_by(social_id=social_id).first()
+	if not user:
+		if User.query.filter_by(username=username).first():
+			new_username = username + " Original"
+			flash(f"Похоже юзер с именем {username} уже существует")
+			flash(f"МЫ временно изменили его на {new_username}.")
+			flash("У вас будет возможность изменить один раз username в личном кабинете.")
+			username = new_username
+		else:
+			flash('Congratulations, you are now a registered user!')
+		user = User(username=username, email=email,social_id=social_id)
+		db.session.add(user)
+		db.session.commit()
+	login_user(user, True)
+	if not email:
+		return redirect(url_for('finish_register'))
+	return redirect(url_for('index'))
+
+@app.route('/finish_register',methods=["GET",'POST'])
+@login_required
+def finish_register():
+	if current_user.email:
+		return redirect('index')
+	form = EmailForm()
+	if form.validate_on_submit():
+		current_user.email = form.email.data
+		db.session.commit()
+		flash('Регистрация завершена успешно! Установите пароль от учётной записи в личном кабинете.')
+		return redirect(url_for('index'))
+	return render_template('finish_register.html',form=form)
 
 
-# def redd(location, code=302, Response=None):
-#
-# 	if Response is None:
-# 		from werkzeug.wrappers import Response
-#
-# 	display_location = escape(location)
-# 	text_type= str
-# 	if isinstance(location, text_type):
-# 		# Safe conversion is necessary here as we might redirect
-# 		# to a broken URI scheme (for instance itms-services).
-# 		from werkzeug.urls import iri_to_uri
-#
-# 		location = iri_to_uri(location, safe_conversion=True)
-# 	response = Response(
-# 		'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n'
-# 		"<title>Redirecting...</title>\n"
-# 		"<h1>Redirecting...</h1>\n"
-# 		"<p>You should be redirected automatically to target URL: "
-# 		'<a href="%s">%s</a>.  If not click the link.'
-# 		% (escape(location), display_location),
-# 		code,
-# 		mimetype="text/html",
-#     )
-# 	response.headers["Location"] = location
-# 	return response
-
-# @app.route('/geo')
-# def geo():
-# 	url = "https://ipinfo.io/json"
-# 	# return redd(url)
 

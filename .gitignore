@@ -1,4 +1,8 @@
-__pycache__/
+# Игнорировать байткод
+*.pyc
+*.pyo
+
+**/__pycache__/
+
 venv/
 migrations/
-app.db

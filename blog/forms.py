@@ -41,10 +41,10 @@ class EmailForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     submit = SubmitField("Submit")
 
-    def validate_email(self, email):
-        user = User.query.filter_by(email=email.data).first()
-        if user is None:
-            raise ValidationError("This an email address wasn't using.")
+    # def validate_email(self, email):
+    #     user = User.query.filter_by(email=email.data).first()
+    #     if user is None:
+    #         raise ValidationError("This an email address wasn't using.")
 
 class PasswordForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])

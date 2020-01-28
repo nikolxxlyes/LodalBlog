@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import unittest
 from blog import app, db
 from blog.models import User, Post, ExchangeRate
-from help_files.exchange_rates import get_currency_pair,set_currency_pair
+from blog.lib.exchange_rates import get_currency_pair,set_currency_pair
 
 class UserModelCase(unittest.TestCase):
     def setUp(self):

@@ -21,6 +21,7 @@ class User(UserMixin,db.Model):
     password_hash = db.Column(db.String(128))
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow())
+    social_id = db.Column(db.String(64), unique=True)
     posts = db.relationship('Post', backref='author', lazy='dynamic')
     topics = db.relationship('Topic', backref='author', lazy='dynamic')
     followed = db.relationship(
@@ -39,7 +40,10 @@ class User(UserMixin,db.Model):
         return check_password_hash(self.password_hash, password)
 
     def avatar(self,size):
-        digest =  md5(self.email.lower().encode('utf-8')).hexdigest()
+        try:
+            digest =  md5(self.email.lower().encode('utf-8')).hexdigest()
+        except AttributeError:
+            digest = md5('example@gmail.com'.encode('utf-8')).hexdigest()
         return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
             digest, size)
 
@@ -59,7 +63,6 @@ class User(UserMixin,db.Model):
         followed = Post.query.join(
             followers, (followers.c.followed_id == Post.user_id)).filter(
             followers.c.follower_id == self.id)
-            # followers.c.follower_id == self.id,Post.active==1)
         own = Post.query.filter_by(user_id=self.id)
         return followed.union(own).order_by(Post.timestamp.desc())
 

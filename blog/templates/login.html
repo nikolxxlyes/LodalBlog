@@ -19,10 +19,24 @@
             	<span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
-        <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
+        <p>
+            {{ form.remember_me() }} {{ form.remember_me.label }}
+        </p>
         <p>{{ form.submit() }}</p>
     </form>
-    <p><a href="{{ url_for('reset_password') }}">Forgot Password?</a></p>
-    <p>New User? <a href="{{ url_for('register') }}">Click to Register!</a></p>
+        <div id="social">
+            <p style="color:black">быстрая авторизация через соцсети</p>
+            <a href="{{ url_for('oauth_authorize',provider='facebook')}}">
+                <img src="../static/facebook.png" width="48" height="48"></a>
+            <a href="{{ url_for('oauth_authorize',provider='vk')}}">
+                <img src="../static/vkontakte.png" width="48" height="48"></a>
+            <a href="{{ url_for('oauth_authorize',provider='ok')}}">
+                <img src="../static/odnoklassniki.png" width="48" height="48"></a>
+        </div>
+        <p><a href="{{ url_for('index') }}" style="color:white;">Forgot Password?</a></p>
+        <p>New User? <a href="{{ url_for('register') }} " style="color: #b2badb;">Click to Register!</a></p>
+        </div>
+        <div style="padding-top: 25px"></div>
+        <div>
     </div>
 {% endblock %}

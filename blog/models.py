@@ -105,6 +105,9 @@ class Post(db.Model):
     def __repr__(self):
         return f"<Post: {self.body}>"
 
+    def __str__(self):
+        return f"<Post: {self.body}, Author: {self.author}>"
+
     def get_parent(self):
         return Post.query.get(self.parent)
 

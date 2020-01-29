@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block content %}
+{% block app_content %}
     <h1>Курсы валют:</h1>
     <hr>
     <table class="h1_tab">
@@ -12,8 +12,7 @@
         {% if pairs %}
         {% for pair in pairs %}
             <tr id="h1_th" valign="top">
-                <td id="h1_th">
-                </td>
+                <td id="h1_th" style="width:50px "><img src={{"../static/{}.png".format(pair.currency_pair[:3].lower())}} width="32" height="32"></td>
                 <td id="h1_th">{{ pair.currency_pair }}</td>
                 <td id="h1_th">{{ pair.buy }}</td>
                 <td id="h1_th">{{ pair.sale }}</td>

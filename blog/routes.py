@@ -281,7 +281,6 @@ def oauth_authorize(provider):
 
 @app.route('/callback/<provider>')
 def oauth_callback(provider):
-	reversed()
 	if not current_user.is_anonymous:
 		return redirect(url_for('index'))
 	oauth = OAuthSignIn.get_provider(provider)
@@ -348,4 +347,18 @@ def reset_password(token):
 		return redirect(url_for('login'))
 	return render_template('reset_password.html', form=form)
 
-
+# @app.route('/<id>/share')
+# def share_post(id):
+# 	post = Post.query.get(id)
+# 	# if social == 'fb':
+# 	# 	params = {
+# 	# 		'app_id': app.config['OAUTH_CREDENTIALS']['facebook']['id'],
+# 	# 		'display': 'popup',
+# 	# 		'link': 'https://habr.com/ru/post/349060/',
+# 	# 		'redirect_uri': f'http://localhost:5000/u/{username}'
+# 	# 	}
+# 	# 	# r =  requests.get("https://www.facebook.com/dialog/feed?",params=params )
+# 	# 	print(params['redirect_uri'])
+# 	# 	return redirect('https://www.facebook.com/dialog/feed?app_id={app_id}&display={display}&link={link}&redirect_uri={redirect_uri}'.format(**params))
+# 	print('not fb')
+# 	return render_template('share.html', title='Share post',post = post  )

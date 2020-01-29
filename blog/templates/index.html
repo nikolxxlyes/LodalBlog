@@ -1,13 +1,71 @@
-
 {% extends 'base.html' %}
-{% block header %}
+{% block app_header %}
 	 	 <div class="main">
     		<h1>Super community blog</h1>
   		</div>
-{% endblock header %}
-{% block content %}
+		<script>
+		  window.fbAsyncInit = function() {
+			FB.init({
+			  appId      : '469870800631439',
+			  cookie     : true,
+			  xfbml      : true,
+			  version    : 'v5.0'
+			});
+
+			FB.AppEvents.logPageView();
+
+		  };
+
+		  (function(d, s, id){
+			 var js, fjs = d.getElementsByTagName(s)[0];
+			 if (d.getElementById(id)) {return;}
+			 js = d.createElement(s); js.id = id;
+			 js.src = "https://connect.facebook.net/en_US/sdk.js";
+			 fjs.parentNode.insertBefore(js, fjs);
+		   }(document, 'script', 'facebook-jssdk'));
+    	</script>
+		<script type="text/javascript" src="https://vk.com/js/api/share.js?95" charset="windows-1251"></script>
+{% endblock  %}
+{% block app_content %}
 		<h2>
 			<a href="{{ url_for('register') }}">Register an account</a> to make
 			communicate with your friends,neighbors and strangers.
 		</h2>
-{% endblock content %}
+		<h2>Share Project:</h2>
+		<div style="background-color: #e9ede6;border: 1px solid black">
+			<div class="fb-share-button" data-href="https://github.com/nikolxxlyes/LodalBlog" data-layout="button" data-size="small">
+				<a target="_blank"
+			   href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2Fplugins%2F&amp;src=sdkpreparse"
+			   class="fb-xfbml-parse-ignore"></a></div>
+
+			<script type="text/javascript">
+				document.write(VK.Share.button({url:"https://github.com/nikolxxlyes/LodalBlog",
+				image: "https://s8.hostingkartinok.com/uploads/images/2020/01/ee6ce3863e3db91b18c9ef3f9b7920eb.jpg"},
+				{type: "round_nocount", text: "Save"}));
+			</script>
+			<div id="ok_shareWidget"></div>
+				<script>
+				!function (d, id, did, st, title, description, image) {
+				  function init(){
+					OK.CONNECT.insertShareWidget(id,did,st, title, description, image);
+				  }
+				  if (!window.OK || !OK.CONNECT || !OK.CONNECT.insertShareWidget) {
+					var js = d.createElement("script");
+					js.src = "https://connect.ok.ru/connect.js";
+					js.onload = js.onreadystatechange = function () {
+					if (!this.readyState || this.readyState == "loaded" || this.readyState == "complete") {
+					  if (!this.executed) {
+						this.executed = true;
+						setTimeout(init, 0);
+					  }
+					}};
+					d.documentElement.appendChild(js);
+				  } else {
+					init();
+				  }
+				}(document,"ok_shareWidget","https://github.com/nikolxxlyes/LodalBlog",'{"sz":30,"st":"rounded","nc":1,"ck":2,"lang":"en","bgclr":"ED8207","txclr":"FFFFFF"}',"","","https://s8.hostingkartinok.com/uploads/images/2020/01/ee6ce3863e3db91b18c9ef3f9b7920eb.jpg");
+				</script>
+			<!--<a href="https://vk.com/share.php?url=https://github.com/nikolxxlyes/LodalBlog" target="_blank">Поделиться ВКонтакте</a>-->
+		</div>
+
+{% endblock %}

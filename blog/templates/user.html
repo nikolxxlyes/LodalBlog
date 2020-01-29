@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block content %}
+{% block app_content %}
     <table>
         <tr valign="top">
             <td><img style="padding-top: 25px;" src="{{ user.avatar(128) }}"></td>
@@ -22,10 +22,10 @@
     <hr>
     <table class="h1_tab">
         <tr>
-            <th id="h1_th">Theme</th>
-            <th id="h1_th">Post</th>
+            <th id="h1_th">Тема</th>
+            <th id="h1_th">Пост</th>
             {% if current_user == user %}
-                <th id="h1_th">Active</th>
+                <th id="h1_th">Активный</th>
             {% endif %}
         </tr>
     {% for post in posts %}

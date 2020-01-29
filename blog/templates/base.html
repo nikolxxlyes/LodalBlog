@@ -1,6 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+{% extends "bootstrap/base.html" %}
+{% block title %}
+    {% if title %}<title>{{ title }} - LodalBlog</title>{% else %}<title>LodalBlog</title>{% endif %}
+{% endblock  %}
+{% block head %}
     <meta name="viewport" charset="UTF-8" content="width=device-width, initial-scale=1.0">
     <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <style type="text/css">
@@ -104,13 +106,8 @@
             display: block;
         }
     </style>
-
-
-    {% if title %}
-        <title>{{ title }} - LodalBlog</title>
-    {% else %}
-        <title>LodalBlog</title>
-    {% endif %}
+{% endblock  %}
+{% block navbar %}
     <ul id="bar_ul">
         <li id="bar_log" style="float: left;"></li>
         <li><a id="bar_a" href="{{ url_for('index') }}">Lodal Blog:</a></li>
@@ -128,8 +125,12 @@
             </li>
         {% endif %}
     </ul>
-</head>
-<body style="background-color: #e9ede6">
+{% endblock  %}
+{% block content %}
+    <body style="background-color: #e9ede6">
+    <div id="fb-root"></div>
+    <script async defer crossorigin="anonymous"
+            src="https://connect.facebook.net/ru_RU/sdk.js#xfbml=1&autoLogAppEvents=1&version=v5.0&appId=469870800631439"></script>
          {% with messages = get_flashed_messages() %}
             {% if messages %}
                 <div style="background-color: #b2badb; wight:100vh: text-align: center; padding-top:1px;">
@@ -139,7 +140,7 @@
                 </div>
             {% endif %}
         {% endwith %}
-         <div class="container">{% block header %}{% endblock header %}</div>
-	     <div class="container">{% block content %}{% endblock content %}</div>
-</body>
-</html>
+         <div class="container">{% block app_header %}{% endblock %}</div>
+	     <div class="container">{% block app_content %}{% endblock %}</div>
+{% endblock  %}
+

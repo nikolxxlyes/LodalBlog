@@ -1,8 +1,5 @@
 {% extends 'base.html' %}
 {% block app_header %}
-	 	 <div class="main">
-    		<h1>Super community blog</h1>
-  		</div>
 		<script>
 		  window.fbAsyncInit = function() {
 			FB.init({
@@ -27,12 +24,17 @@
 		<script type="text/javascript" src="https://vk.com/js/api/share.js?95" charset="windows-1251"></script>
 {% endblock  %}
 {% block app_content %}
+		<div class="main">
+    		<h1>Super community blog</h1>
+  		</div>
+		<div id="fb-root"></div>
+    	<script async defer crossorigin="anonymous"
+            src="https://connect.facebook.net/ru_RU/sdk.js#xfbml=1&autoLogAppEvents=1&version=v5.0&appId=469870800631439"></script>
 		<h2>
 			<a href="{{ url_for('register') }}">Register an account</a> to make
 			communicate with your friends,neighbors and strangers.
 		</h2>
 		<h2>Share Project:</h2>
-		<div style="background-color: #e9ede6;border: 1px solid black">
 			<div class="fb-share-button" data-href="https://github.com/nikolxxlyes/LodalBlog" data-layout="button" data-size="small">
 				<a target="_blank"
 			   href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2Fplugins%2F&amp;src=sdkpreparse"
@@ -66,6 +68,5 @@
 				}(document,"ok_shareWidget","https://github.com/nikolxxlyes/LodalBlog",'{"sz":30,"st":"rounded","nc":1,"ck":2,"lang":"en","bgclr":"ED8207","txclr":"FFFFFF"}',"","","https://s8.hostingkartinok.com/uploads/images/2020/01/ee6ce3863e3db91b18c9ef3f9b7920eb.jpg");
 				</script>
 			<!--<a href="https://vk.com/share.php?url=https://github.com/nikolxxlyes/LodalBlog" target="_blank">Поделиться ВКонтакте</a>-->
-		</div>
 
 {% endblock %}

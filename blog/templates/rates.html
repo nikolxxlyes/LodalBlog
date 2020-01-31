@@ -20,6 +20,6 @@
         {% endfor %}
         {% endif %}
     </table>
-<h3>По данным PrivatBank на {{ pairs[0].timestamp}}</h3>
+<h3>Data from PrivatBank. Last update - {{ moment(pairs[0].timestamp).calendar() }}.</h3>
 <button><a href="{{url_for('rates',pull=1) }}">Обновить</a></button>
 {% endblock %}

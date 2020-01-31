@@ -1,5 +1,5 @@
 <tr id="h1_th" valign="top">
-    <td id="h1_th">
+    <td id="h1_th" style="width:20%">
         <div><b><a href="{{ url_for('user', username=post.author.username) }}">{{ post.author.username }}</a></b></div>
         <div><img src="{{ post.author.avatar(45) }}"></div>
     </td>
@@ -12,7 +12,7 @@
         {% endif %}
         <div><h4>{{ post.body }}</h4></div>
         <div>
-            {{ post.timestamp }}
+            {{ moment(post.timestamp).fromNow() }}
             {% if not current_user.is_anonymous %}
               __ <a href="{{ url_for('new_post', t=post.topic.id, p=post.id) }}">Коментировать</a>
             {% endif %}

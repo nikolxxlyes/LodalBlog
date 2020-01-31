@@ -19,10 +19,11 @@
                 <td id="h1_th">
                     <div><h4><a href="{{ url_for('topic',t=topic.id) }}">{{ topic.name }}</a></h4></div>
                     <div><a href="{{ url_for('user', username=topic.author.username) }}"> {{ topic.author.username }}</a>
-                        added topic in {{ topic.timestamp }}</div>
+                        added {{ moment(topic.timestamp).calendar() }}</div>
                 </td>
                 <td id="h1_th">{{ topic.count_posts }}</td>
-                <td id="h1_th" >{{ topic.last_time  }}</td>
+                <td id="h1_th" ><a href="{{ url_for('user',username=topic.last_post.author.username) }}">
+                    {{ topic.last_post.author.username.capitalize() }}</a>  / {{ moment(topic.last_time).fromNow()  }}</td>
             </tr>
         {% endfor %}
         {% endif %}

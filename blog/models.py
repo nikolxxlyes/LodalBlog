@@ -120,3 +120,4 @@ class ExchangeRate(db.Model):
 
     def __repr__(self):
         return f"<{self.currency_pair}: {self.buy}/{self.sale}>"
+

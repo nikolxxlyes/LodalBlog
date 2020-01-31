@@ -1,29 +1,15 @@
 {% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
 {% block app_content %}
     <div style="padding-top: 100px"></div>
     <div id="login">
         <h1>Sign In:</h1>
-    <form action="" method="post" >
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.username.label }}:<br>
-            {{ form.username(size=32) }}<br>
-			{% for error in form.username.errors %}
-            	<span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.password.label }}:<br>
-            {{ form.password(size=32) }}<br>
-			{% for error in form.password.errors %}
-            	<span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.remember_me() }} {{ form.remember_me.label }}
-        </p>
-        <p>{{ form.submit() }}</p>
-    </form>
+        <div class="row" >
+            <div class="col-md-4" style="width:80%; left: 10%;">
+                {{ wtf.quick_form(form) }}
+            </div>
+        </div>
+        <div style="padding-top: 10px"></div>
         <div id="social">
             <p style="color:black">быстрая авторизация через соцсети</p>
             <a href="{{ url_for('oauth_authorize',provider='facebook')}}">
@@ -36,7 +22,6 @@
         <p><a href="{{ url_for('reset_password_request') }}" style="color:white;">Forgot Password?</a></p>
         <p>New User? <a href="{{ url_for('register') }} " style="color: #b2badb;">Click to Register!</a></p>
         </div>
-        <div style="padding-top: 25px"></div>
         <div>
     </div>
 {% endblock %}

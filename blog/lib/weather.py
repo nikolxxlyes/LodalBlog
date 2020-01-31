@@ -1,12 +1,22 @@
 import json
-import pprint
+from datetime import datetime
 import os
 
-def geo_import(city):
+def get_city(loc):
+    from geopy.geocoders import Nominatim
+    coord = json.loads(loc)
+    query = coord.values()
+    geolocator = Nominatim(user_agent="LodalBlog")
+    location = geolocator.reverse(query,language='en')
+    city = location.raw['address']['city']
+    country_code = location.raw['address']['country_code']
+    return city,country_code
+
+def geo_import(city,county_code='ua'):
     global file_name
     import requests
-    url = "https://api.openweathermap.org/data/2.5/forecast?q={}&APPID={}&units=metric".format(
-            city,'59f15f0d844c57412ffd602800d16379')
+    url = "https://api.openweathermap.org/data/2.5/forecast?q={},{}&APPID={}&units=metric".format(
+            city,county_code,'59f15f0d844c57412ffd602800d16379')
     r = requests.get(url)
     # print(r.status_code)
 
@@ -16,15 +26,18 @@ def geo_import(city):
     with open(file_name,'w') as fo:
         json.dump(w,fo)
 
-def get_geo():
+def get_geo(city):
     global file_name
-    with open(file_name,'r') as fo:
-        weather = json.load(fo)
+    try:
+        with open(file_name,'r') as fo:
+            weather = json.load(fo)
+    except FileNotFoundError:
+        geo_import(city)
     info_weather = []
     for w in weather['list']:
         des = {
             'city_name': weather['city']['name'],
-            'time': w['dt_txt'],
+            'time': datetime.strptime(w['dt_txt'],'%Y-%m-%d %H:%M:%S'),
             'feels_like': w['main']['feels_like'],
             'temp': w['main']['temp'],
             'wind_spd': w['wind']['speed'],
@@ -40,6 +53,9 @@ def get_geo():
         info_weather.append(des)
     return info_weather
 
-file_name = os.path.join('blog','static','current_weather.json')
-# geo_import('kiev',file_name)
-# pprint.pprint(get_geo(file_name))
+file_name = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'current_weather.json')
+
+if __name__  == "__main__":
+    import pprint
+    geo_import('kiev')
+    pprint.pprint(get_geo(file_name))

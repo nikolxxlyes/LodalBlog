@@ -2,7 +2,7 @@
 from blog import app,db
 from flask import render_template, url_for, redirect,flash,session
 from .forms import LoginForm,RegistrationForm,EditProfileForm,EmailForm, \
-	NewTopicForm, EditTopicForm, NewPostForm, EditPostForm, \
+	NewTopicForm, EditTopicForm, NewPostForm, EditPostForm, ResetEmailForm,\
 	ResetPasswordForm
 from flask_login import logout_user,login_user,current_user,login_required
 from blog.models import User, Topic, Post,ExchangeRate
@@ -10,7 +10,7 @@ from flask import request
 from werkzeug.urls import url_parse
 from datetime import datetime
 from blog.lib.exchange_rates import set_currency_pair
-from blog.lib.weather import get_geo,geo_import
+from blog.lib.weather import get_geo,geo_import,get_city
 #oauth
 from blog.oauth import OAuthSignIn
 #reset_password
@@ -87,12 +87,16 @@ def edit_profile(username):
 	form = EditProfileForm()
 	if form.validate_on_submit():
 		current_user.username = form.username.data
+		current_user.email = form.email.data
 		current_user.about_me = form.about_me.data
+		if form.new_password.data:
+			current_user.set_password(form.new_password.data)
 		db.session.commit()
 		flash('Your changes have been saved.')
-		return redirect(url_for('edit_profile',username=form.username.data))
+		return redirect(url_for('user',username=form.username.data))
 	elif request.method == "GET":
 		form.username.data = current_user.username
+		form.email.data = current_user.email
 		form.about_me.data = current_user.about_me
 	return render_template('edit_profile.html', title='Edit Profile', form=form)
 
@@ -110,7 +114,7 @@ def topics():
 		last_post = topic.posts.filter(Post.active==1).order_by(Post.timestamp.desc()).first()
 		last_time = last_post.timestamp if last_post else topic.timestamp
 		topics_sellect.append({'author': topic.author, 'id': topic.id,'name': topic.name, 'timestamp': topic.timestamp,
-					   'count_posts': count_posts,'last_time':last_time})
+					   'count_posts': count_posts,'last_time':last_time, 'last_post':last_post})
 	return render_template('topics.html',title='Topics', topics=topics_sellect,next_url=next_url,
 						   prev_url=prev_url,icon_url=icon_url)
 
@@ -174,7 +178,7 @@ def new_post():
 	on_session_data = session.pop('data_post',None)
 	if form.validate_on_submit() or on_session_data:
 		if on_session_data:
-			form.body.data = on_session_data
+			form.body.data = on_session_data['body']
 		user_id = current_user.id
 		post = Post(body=form.body.data, user_id=user_id, topic_id=t,parent=p)
 		db.session.add(post)
@@ -259,17 +263,30 @@ def rates():
 
 @app.route('/weather')
 def weather():
-	city='kiev'
-	weathers = get_geo()
-	date = datetime.strptime(weathers[0]["time"], '%Y-%m-%d %H:%M:%S')
+	city='Kyiv'
+	weathers = get_geo(city)
 	if request.args.get('pull'):
-		delta = datetime.utcnow() - date
-		delta = delta.seconds // 3600
-		if delta >= 1:
+		# delta = datetime.utcnow() - weathers[0]["time"]
+		# delta = delta.seconds // 3600
+		if datetime.utcnow() >= weathers[0]["time"]:
 			geo_import(city)
-			weathers = get_geo()
+			weathers = get_geo(city)
 		else:
 			flash("В Метеостанции перерыв.")
+	try:
+		location = request.args.get('loc')
+		new_city,country_code = get_city(location)
+		if new_city != city:
+			geo_import(new_city)
+			# print(new_city,' - new_city')
+			weathers = get_geo(new_city)
+	except TypeError:
+		print('no request')
+	except ValueError:
+		flash('Your coordinates is not valid.')
+	except Exception as e:
+		print(type(e),e)
+	print(1)
 	return render_template('weather.html', title="Weather", weathers=weathers)
 
 @app.route('/authorize/<provider>')
@@ -292,9 +309,8 @@ def oauth_callback(provider):
 	if not user:
 		if User.query.filter_by(username=username).first():
 			new_username = username + " Original"
-			flash(f"Похоже юзер с именем {username} уже существует")
-			flash(f"МЫ временно изменили его на {new_username}.")
-			flash("У вас будет возможность изменить один раз username в личном кабинете.")
+			flash(f"Похоже пользователь с именем '{username}' уже существует. Мы зарегистрировали вас как '{new_username}'.")
+			flash("У вас будет возможность изменить username в личном кабинете.")
 			username = new_username
 		else:
 			flash('Congratulations, you are now a registered user!')
@@ -316,14 +332,14 @@ def finish_register():
 		current_user.email = form.email.data
 		db.session.commit()
 		flash('Регистрация завершена успешно! Установите пароль от учётной записи в личном кабинете.')
-		return redirect(url_for('index'))
+		return redirect(url_for('index'))	
 	return render_template('finish_register.html',form=form)
 
 @app.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():
 	if current_user.is_authenticated:
 		return redirect(url_for('index'))
-	form = EmailForm()
+	form = ResetEmailForm()
 	if form.validate_on_submit():
 		user = User.query.filter_by(email=form.email.data).first()
 		if user:
@@ -347,18 +363,8 @@ def reset_password(token):
 		return redirect(url_for('login'))
 	return render_template('reset_password.html', form=form)
 
-# @app.route('/<id>/share')
-# def share_post(id):
-# 	post = Post.query.get(id)
-# 	# if social == 'fb':
-# 	# 	params = {
-# 	# 		'app_id': app.config['OAUTH_CREDENTIALS']['facebook']['id'],
-# 	# 		'display': 'popup',
-# 	# 		'link': 'https://habr.com/ru/post/349060/',
-# 	# 		'redirect_uri': f'http://localhost:5000/u/{username}'
-# 	# 	}
-# 	# 	# r =  requests.get("https://www.facebook.com/dialog/feed?",params=params )
-# 	# 	print(params['redirect_uri'])
-# 	# 	return redirect('https://www.facebook.com/dialog/feed?app_id={app_id}&display={display}&link={link}&redirect_uri={redirect_uri}'.format(**params))
-# 	print('not fb')
-# 	return render_template('share.html', title='Share post',post = post  )
+@app.route('/geo', methods=['GET', 'POST'])
+def geo():
+	cord = request.form['answer']
+	print(cord)
+	return render_template("geo2.html",cord=cord)

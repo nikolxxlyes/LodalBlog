@@ -3,6 +3,8 @@ import unittest
 from blog import app, db
 from blog.models import User, Post, ExchangeRate
 from blog.lib.exchange_rates import get_currency_pair,set_currency_pair
+from blog.lib.weather import get_geo
+
 
 class UserModelCase(unittest.TestCase):
     def setUp(self):
@@ -95,6 +97,13 @@ class UserModelCase(unittest.TestCase):
         self.assertEqual(i.currency_pair, pair['currency_pair'])
         self.assertEqual(i.buy, pair['buy'])
         self.assertEqual(i.sale, pair['sale'])
+
+    # def test_currency_weather(self):
+    #     city = 'Kyiv'
+    #     info_weather = get_geo(city)
+    #     self.assertEqual(city,info_weather['city_name'])
+    #     self.assertIsInstance(info_weather['time'],datetime)
+    #     self.assertIsInstance(info_weather['icon_url'],str)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

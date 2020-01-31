@@ -7,14 +7,16 @@ from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from flask_mail import Mail
 
+
 app = Flask(__name__)
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
+login.login_message = "You need to be registered to see this page."
 moment = Moment(app)
 bootstrap = Bootstrap(app)
 mail = Mail(app)
 
-from blog import routes, models,errors
+from blog import routes, models, errors

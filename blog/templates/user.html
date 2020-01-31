@@ -6,7 +6,7 @@
             <td style="padding-left: 10px;">
                 <h1>User: {{ user.username }}</h1>
                 <p>Немного о себе: {% if user.about_me %} {{ user.about_me }}{% endif %}</p>
-                <p>Был здесь: {% if user.last_seen %}{{ user.last_seen }}{% endif %}</p>
+                <p>Был здесь: {% if user.last_seen %}{{ moment(user.last_seen).format('LLL') }}{% endif %}</p>
                 <p>{{ user.followers.count() }} Подписчиков, {{ user.followed.count() }} Подписки</p>
                 {% if current_user == user %}
                     <p><a href="{{ url_for('edit_profile', username=current_user.username) }}">Редактировать профиль</a></p>

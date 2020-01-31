@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
 {% block app_content %}
     <h1>{{ topic.name }}</h1>
     <hr>
@@ -6,16 +8,9 @@
     {% if post.parent %}
         <h3>Коментировать  -- {{ post.parent }}</h3>
     {% endif %}
-    <form action="" method="post" >
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.body.label }}:<br>
-            {{ form.body(cols=50,rols=4) }}<br>
-			{% for error in form.body.errors %}
-            	<span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>{{ form.active() }}{{ form.active.label() }}</p>
-        <p>{{ form.submit() }}</p>
-    </form>
+    <div class="row">
+        <div class="col-md-4">
+            {{ wtf.quick_form(form) }}
+        </div>
+    </div>
 {% endblock %}

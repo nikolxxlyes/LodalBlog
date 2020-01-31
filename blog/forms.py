@@ -29,7 +29,11 @@ class RegistrationForm(FlaskForm):
 
 class EditProfileForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
-    about_me = TextAreaField('About me', validators=[DataRequired(),Length(min=0,max=140)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    about_me = TextAreaField('About me', validators=[Length(min=0,max=140)])
+    last_password = PasswordField('Last password')
+    new_password = PasswordField('New password')
+    password2 = PasswordField('Repeat password', validators=[EqualTo('new_password')])
     submit = SubmitField("Submit")
 
     def validate_username(self,username):
@@ -37,9 +41,40 @@ class EditProfileForm(FlaskForm):
         if user is not None and user.username != current_user.username:
             raise ValidationError('Please use a different username.')
 
+    def validate_email(self,email):
+        user = User.query.filter_by(email=email.data).first()
+        if user is not None and user.email != current_user.email:
+            raise ValidationError('Please use a different email.')
+
+    def validate_new_password(self,new_password):
+        if new_password.data:
+            if current_user.password_hash:
+                if not self.last_password.data:
+                    raise ValidationError('Check your last passsword above.')
+                if current_user.check_password(new_password.data):
+                    raise ValidationError('New password must be another compare with last password!')
+
+
+    def validate_last_password(self,last_password):
+        if last_password.data:
+            if not self.new_password.data:
+                raise ValidationError('Enter new password below.')
+            if not current_user.check_password(last_password.data):
+                raise ValidationError('Invalid password')
+
+
+class ResetEmailForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Submit')
+
 class EmailForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
-    submit = SubmitField('Reset')
+    submit = SubmitField('Submit')
+
+    def validate_email(self,email):
+        user = User.query.filter_by(email=email.data).first()
+        if user is not None and user.email != current_user.email:
+            raise ValidationError('Please use a different email.')
 
 class ResetPasswordForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
@@ -79,3 +114,4 @@ class EditPostForm(FlaskForm):
     body = TextAreaField('Post', validators=[DataRequired(),Length(min=0,max=140)])
     active = BooleanField('Active')
     submit = SubmitField("Apply")
+

@@ -4,7 +4,8 @@ class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY') or "you_wont_dell_yourself"
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
                               'sqlite:///' + os.path.join(basedir, 'app.db')
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+                              # 'mysql+pymysql://username:password@localhost:5000/db_name'
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
     POST_PER_PAGE = 7
     TOPIC_PER_PAGE = 7
     MAIL_SERVER = os.environ.get('MAIL_SERVER')
@@ -13,7 +14,6 @@ class Config(object):
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     ADMINS = ['nikolayesypchuk@gmail.com']
-
     OAUTH_CREDENTIALS = {
         'vk': {
             'id': '7291538',
@@ -22,14 +22,6 @@ class Config(object):
         'facebook': {
             'id': '469870800631439',
             'secret': '82bab5683aaab36182e13cb4db224183'
-        },
-        'twitter': {
-            'id': '3RzWQclolxWZIMq5LJqzRZPTl',
-            'secret': 'm9TEd58DSEtRrZHpz2EjrV9AhsBRxKMo8m3kuIZj3zLwzwIimt'
-        },
-        'instagram': {
-            'id': '3RzWQclolxWZIMq5LJqzRZPTl',
-            'secret': 'm9TEd58DSEtRrZHpz2EjrV9AhsBRxKMo8m3kuIZj3zLwzwIimt'
         },
         'ok': {
             'id': '512000333516',

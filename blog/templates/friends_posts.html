@@ -22,7 +22,7 @@
                 </td>
                 <td id="h1_th">
                     <div>{{ post.body }}</div>
-                    <div>{{ post.timestamp }}
+                    <div>{{ moment(post.timestamp).fromNow() }}
                          __ <a href="{{ url_for('new_post', t=post.topic.id, p=post.id) }}">Repost</a>
                         {% if current_user == post.author %}
                          __ <a href="{{ url_for('edit_post', p=post.id) }}">Edit</a>

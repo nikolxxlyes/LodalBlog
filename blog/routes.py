@@ -10,7 +10,7 @@ from flask import request
 from werkzeug.urls import url_parse
 from datetime import datetime
 from blog.lib.exchange_rates import set_currency_pair
-from blog.lib.weather import get_city,geo_import,get_edited_weather
+from blog.lib.weather import get_city,geo_import
 #oauth
 from blog.oauth import OAuthSignIn
 #reset_password
@@ -272,11 +272,11 @@ def weather():
 	try:
 		loc = request.args.get('loc')
 		city,c_code = get_city(loc)
-		print(city, ' - current city')
+		# print(city, ' - current city')
 	except TypeError:
 		city = 'kyiv'
 		c_code = 'ua'
-		print('No response')
+		# print('No response')
 	except ValueError:
 		print('no valid coordinates')
 		flash("Your coordinates is not valid.")
@@ -295,7 +295,6 @@ def weather():
 		weathers = W_p.query.filter_by(city=city).all()
 	except TypeError:
 		pass
-	# weathers = sorted(weathers,key=lambda x: x.timestamp)
 	return render_template('weather.html', title="Weather", weathers=weathers, icon_url=icon_url )
 
 @app.route('/authorize/<provider>')

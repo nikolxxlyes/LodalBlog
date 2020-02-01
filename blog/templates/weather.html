@@ -1,40 +1,32 @@
 {% extends 'base.html' %}
 {% block app_content %}
-    <h1>Прогноз погоды - {{ weathers[0]['city_name'] }}:</h1>
-    <button><a href="{{url_for('weather',pull=1) }}">Обновить данные</a></button>
+    <h1>Прогноз погоды - {% if weathers %}
+                            {{ weathers[0].city.title() }} ({{ weathers[0].country }}):
+                        {% endif %}</h1>
+        <script>
+        var x = document.getElementById("demo");
 
-    <button onclick="getLocation()">Обновить город</button>
-    <p id="demo"></p>
-
-    <script>
-    var x = document.getElementById("demo");
-
-    function getLocation() {
-      if (navigator.geolocation) {
+        if (navigator.geolocation) {
          navigator.geolocation.getCurrentPosition(showPosition);
-      } else {
-        x.innerHTML = "Geolocation is not supported by this browser.";
-      }
-    }
+        }
 
-    function showPosition(position) {
-      var coord = {"lat":  position.coords.latitude, "lon": position.coords.longitude};
-      var myJSON = JSON.stringify(coord);
-      var request = new XMLHttpRequest();
-      function reqReadyStateChange() {
-            if (request.readyState == 4) {
-                var status = request.status;
-                if (status == 200) {
-                    document.getElementById("output").innerHTML=request.responseText;
+        function showPosition(position) {
+          var coord = {"lat":  position.coords.latitude, "lon": position.coords.longitude};
+          var myJSON = JSON.stringify(coord);
+          var request = new XMLHttpRequest();
+          function reqReadyStateChange() {
+                if (request.readyState == 4) {
+                    var status = request.status;
+                    if (status == 200) {
+                        document.getElementById("output").innerHTML=request.responseText;
+                    }
                 }
             }
+          request.open("GET", "http://localhost:5000/weather?loc="+ JSON.stringify(coord));
+          request.onreadystatechange = reqReadyStateChange;
+          request.send();
         }
-      request.open("GET", "http://localhost:5000/weather?loc="+ JSON.stringify(coord));
-      request.onreadystatechange = reqReadyStateChange;
-      request.send();
-    }
-    </script>
-
+        </script>
     <hr>
     <table class="h1_tab">
         <tr>
@@ -47,21 +39,20 @@
             <th id="h1_th">Описание</th>
         </tr>
         {% if weathers %}
-        {% for weather in weathers%}
+        {% for weather in weathers %}
             <tr id="h1_th" valign="top">
-                <td id="h1_th" style="text-align: center; padding-top :10px" ><img src={{weather['icon_url']}}></td>
-                <td id="h1_th">{{ moment(weather['time']).calendar() }}</td>
-                <td id="h1_th">{{ weather['temp'] }} </td>
-                <td id="h1_th">{{ weather['feels_like'] }} </td>
-                <td id="h1_th">{{ weather['wind_spd']}}</td>
-                {% if weather['snow'] %}
-                    <td id="h1_th">{{ weather['snow']}}</td>
-                {% elif weather['rain'] %}
-                    <td id="h1_th">{{ weather['rain']}}</td>
+                <td id="h1_th" style="text-align: center; padding-top :10px" >
+                    <img src={{icon_url.format(weather.icon)}}></td>
+                <td id="h1_th">{{ moment(weather.timestamp).calendar() }}</td>
+                <td id="h1_th">{{ weather.temp }} </td>
+                <td id="h1_th">{{ weather.feels_like }} </td>
+                <td id="h1_th">{{ weather.wind_spd }}</td>
+                {% if weather.precipitation %}
+                    <td id="h1_th">{{ weather.precipitation }}</td>
                 {% else %}
                     <td id="h1_th">Без осадков</td>
                 {% endif %}
-                <td id="h1_th">{{ weather['description']}}</td>
+                <td id="h1_th">{{ weather.description.capitalize() }}</td>
             </tr>
         {% endfor %}
         {% endif %}

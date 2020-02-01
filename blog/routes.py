@@ -5,12 +5,12 @@ from .forms import LoginForm,RegistrationForm,EditProfileForm,EmailForm, \
 	NewTopicForm, EditTopicForm, NewPostForm, EditPostForm, ResetEmailForm,\
 	ResetPasswordForm
 from flask_login import logout_user,login_user,current_user,login_required
-from blog.models import User, Topic, Post,ExchangeRate
+from blog.models import User, Topic, Post,ExchangeRate, WeatherPoint as W_p
 from flask import request
 from werkzeug.urls import url_parse
 from datetime import datetime
 from blog.lib.exchange_rates import set_currency_pair
-from blog.lib.weather import get_geo,geo_import,get_city
+from blog.lib.weather import get_city,geo_import,get_edited_weather
 #oauth
 from blog.oauth import OAuthSignIn
 #reset_password
@@ -261,33 +261,42 @@ def rates():
 			flash("Новых валютных котировок еще не прислали.")
 	return render_template('rates.html', title="Exchange rates", pairs=pairs,)
 
+
+@app.route('/share')
+def share():
+	pass
+
 @app.route('/weather')
 def weather():
-	city='Kyiv'
-	weathers = get_geo(city)
-	if request.args.get('pull'):
-		# delta = datetime.utcnow() - weathers[0]["time"]
-		# delta = delta.seconds // 3600
-		if datetime.utcnow() >= weathers[0]["time"]:
-			geo_import(city)
-			weathers = get_geo(city)
-		else:
-			flash("В Метеостанции перерыв.")
+	icon_url = "http://openweathermap.org/img/wn/{}@2x.png"
 	try:
-		location = request.args.get('loc')
-		new_city,country_code = get_city(location)
-		if new_city != city:
-			geo_import(new_city)
-			# print(new_city,' - new_city')
-			weathers = get_geo(new_city)
+		loc = request.args.get('loc')
+		city,c_code = get_city(loc)
+		print(city, ' - current city')
 	except TypeError:
-		print('no request')
+		city = 'kyiv'
+		c_code = 'ua'
+		print('No response')
 	except ValueError:
-		flash('Your coordinates is not valid.')
+		print('no valid coordinates')
+		flash("Your coordinates is not valid.")
 	except Exception as e:
-		print(type(e),e)
-	print(1)
-	return render_template('weather.html', title="Weather", weathers=weathers)
+		print(e,type(e))
+	weathers = W_p.query.filter_by(city=city).all()
+	try:
+		if datetime.utcnow() >= weathers[0].timestamp:
+			for weather in weathers:
+				db.session.delete(weather)
+			db.session.commit()
+			geo_import(city, c_code)
+			weathers = W_p.query.filter_by(city=city).all()
+	except IndexError:
+		geo_import(city, c_code)
+		weathers = W_p.query.filter_by(city=city).all()
+	except TypeError:
+		pass
+	# weathers = sorted(weathers,key=lambda x: x.timestamp)
+	return render_template('weather.html', title="Weather", weathers=weathers, icon_url=icon_url )
 
 @app.route('/authorize/<provider>')
 def oauth_authorize(provider):
@@ -301,7 +310,7 @@ def oauth_callback(provider):
 	if not current_user.is_anonymous:
 		return redirect(url_for('index'))
 	oauth = OAuthSignIn.get_provider(provider)
-	social_id, username, email,*par = oauth.callback()
+	social_id, username, email = oauth.callback()
 	if social_id is None:
 		flash('Authentication failed.')
 		return redirect(url_for('index'))
@@ -363,8 +372,3 @@ def reset_password(token):
 		return redirect(url_for('login'))
 	return render_template('reset_password.html', form=form)
 
-@app.route('/geo', methods=['GET', 'POST'])
-def geo():
-	cord = request.form['answer']
-	print(cord)
-	return render_template("geo2.html",cord=cord)

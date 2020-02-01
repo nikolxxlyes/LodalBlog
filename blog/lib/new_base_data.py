@@ -4,8 +4,8 @@ from blog.models import User,Post,Topic
 Заполняет базу юзерами, темами и постами для теста
 """
 #Закоментируйте следующие две строчки для работы с реальной базой
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
-db.create_all()
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
+# db.create_all()
 
 #создание юзеров
 users = [User(username="admin_{}".format(i),email=f'admin{i}@gmail.com') for i in range(11,20)]

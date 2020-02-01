@@ -121,3 +121,17 @@ class ExchangeRate(db.Model):
     def __repr__(self):
         return f"<{self.currency_pair}: {self.buy}/{self.sale}>"
 
+class WeatherPoint(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    city = db.Column(db.String(32))
+    country = db.Column(db.String(32))
+    timestamp = db.Column(db.DateTime(),index=True,)
+    temp = db.Column(db.Float(precision=2))
+    feels_like = db.Column(db.Float(precision=2))
+    wind_spd = db.Column(db.Float(precision=2))
+    description = db.Column(db.String(16))
+    icon = db.Column(db.String(8))
+    precipitation = db.Column(db.Float(precision=2))
+
+    def __repr__(self):
+        return f"<{self.city}/{self.country} on {self.timestamp}>".capitalize()

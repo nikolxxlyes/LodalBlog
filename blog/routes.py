@@ -64,10 +64,7 @@ def logout():
 def user(username):
 	user = User.query.filter_by(username=username).first_or_404()
 	page = request.args.get('page', 1, type=int)
-	if current_user == user:
-		filter = Post.user_id==user.id,
-	else:
-		filter = Post.user_id==user.id,Post.active == 1
+	filter = Post.user_id==user.id if current_user == user else Post.user_id==user.id,Post.active == 1
 	posts = Post.query.filter(*filter).order_by(Post.timestamp.desc()).paginate(
 		page, app.config['POST_PER_PAGE'], False)
 	next_url = url_for('user',username=user.username, page=posts.next_num) if posts.has_next else None
@@ -108,14 +105,11 @@ def topics():
 	next_url = url_for('topics', page=topics.next_num) if topics.has_next else None
 	prev_url = url_for('topics', page=topics.prev_num) if topics.has_prev else None
 	icon_url = '//icon-icons.com/icons2/2110/PNG/{}/comment_icon_131036.png'.format(48)
-	topics_sellect = []
 	for topic in topics.items:
-		count_posts = topic.posts.filter(Post.active==1).count()
-		last_post = topic.posts.filter(Post.active==1).order_by(Post.timestamp.desc()).first()
-		last_time = last_post.timestamp if last_post else topic.timestamp
-		topics_sellect.append({'author': topic.author, 'id': topic.id,'name': topic.name, 'timestamp': topic.timestamp,
-					   'count_posts': count_posts,'last_time':last_time, 'last_post':last_post})
-	return render_template('topics.html',title='Topics', topics=topics_sellect,next_url=next_url,
+		topic.count_posts = topic.posts.filter(Post.active==1).count()
+		topic.last_post = topic.posts.filter(Post.active==1).order_by(Post.timestamp.desc()).first()
+		topic.last_time = topic.last_post.timestamp if topic.last_post else topic.timestamp
+	return render_template('topics.html',title='Topics', topics=topics.items,next_url=next_url,
 						   prev_url=prev_url,icon_url=icon_url)
 
 @app.route('/topic/<t>', methods=['GET', 'POST'])
@@ -255,18 +249,26 @@ def rates():
 		delta = datetime.utcnow() - pairs[0].timestamp
 		delta = delta.seconds // 3600
 		if delta >= 1:
+			old_pairs = pairs
 			set_currency_pair(db,ExchangeRate)
 			pairs = ExchangeRate.query.all()
+			for old in old_pairs:
+				for pair in pairs:
+					if old.currency_pair == pair.currency_pair:
+						delta_buy = round(pair.buy - old.buy,2)
+						delta_sale = round(pair.sale - old.sale,2)
+						pair.delta_buy = f"(+{delta_buy})" if delta_buy >= 0 else f"({delta_buy})"
+						pair.delta_sale = f"(+{delta_sale})" if delta_sale >= 0 else f"({delta_sale})"
 		else:
 			flash("Новых валютных котировок еще не прислали.")
-	return render_template('rates.html', title="Exchange rates", pairs=pairs,)
+	return render_template('rates.html', title="Exchange rates", pairs=pairs)
 
 
 @app.route('/share')
 def share():
 	pass
 
-@app.route('/weather')
+@app.route('/weather', methods=["POST", "GET"])
 def weather():
 	icon_url = "http://openweathermap.org/img/wn/{}@2x.png"
 	try:
@@ -295,6 +297,8 @@ def weather():
 		weathers = W_p.query.filter_by(city=city).all()
 	except TypeError:
 		pass
+	# if request.method == "POST":
+	# 	return redirect(url_for('index'))
 	return render_template('weather.html', title="Weather", weathers=weathers, icon_url=icon_url )
 
 @app.route('/authorize/<provider>')

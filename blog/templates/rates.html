@@ -13,9 +13,15 @@
         {% for pair in pairs %}
             <tr id="h1_th" valign="top">
                 <td id="h1_th" style="width:50px "><img src={{"../static/{}.png".format(pair.currency_pair[:3].lower())}} width="32" height="32"></td>
-                <td id="h1_th">{{ pair.currency_pair }}</td>
-                <td id="h1_th">{{ pair.buy }}</td>
-                <td id="h1_th">{{ pair.sale }}</td>
+                <td id="h1_th"><div>{{ pair.currency_pair }}</td>
+                <td id="h1_th">
+                    <div>{{ pair.buy }}
+                        <span style="color:blue;float:right">{{ pair.delta_buy }}</span></div>
+                </td>
+                <td id="h1_th">
+                    <div>{{ pair.sale }}
+                        <span style="color:blue;float:right">{{ pair.delta_sale }}</span></div>
+                </td>
             </tr>
         {% endfor %}
         {% endif %}

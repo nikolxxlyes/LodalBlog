@@ -23,7 +23,7 @@
                 </td>
                 <td id="h1_th">{{ topic.count_posts }}</td>
                 <td id="h1_th" ><a href="{{ url_for('user',username=topic.last_post.author.username) }}">
-                    {{ topic.last_post.author.username.capitalize() }}</a>  / {{ moment(topic.last_time).fromNow()  }}</td>
+                    {{ topic.last_post.author.username }}</a>  / {{ moment(topic.last_time).fromNow()  }}</td>
             </tr>
         {% endfor %}
         {% endif %}

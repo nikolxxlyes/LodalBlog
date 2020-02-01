@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block app_content %}
     <h1>Прогноз погоды - {% if weathers %}
-                            {{ weathers[0].city.title() }} ({{ weathers[0].country }}):
+                            {{ weathers[0].city.title() }}({{ weathers[0].country }}):
                         {% endif %}</h1>
         <script>
         var x = document.getElementById("demo");
@@ -44,8 +44,8 @@
                 <td id="h1_th" style="text-align: center; padding-top :10px" >
                     <img src={{icon_url.format(weather.icon)}}></td>
                 <td id="h1_th">{{ moment(weather.timestamp).calendar() }}</td>
-                <td id="h1_th">{{ weather.temp }} </td>
-                <td id="h1_th">{{ weather.feels_like }} </td>
+                <td id="h1_th">{% if weather.temp>=0 %}+{% endif%}{{ weather.temp }} </td>
+                <td id="h1_th">{% if weather.feels_like>=0 %}+{% endif%}{{ weather.feels_like }} </td>
                 <td id="h1_th">{{ weather.wind_spd }}</td>
                 {% if weather.precipitation %}
                     <td id="h1_th">{{ weather.precipitation }}</td>
